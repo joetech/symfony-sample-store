@@ -3,14 +3,17 @@
 namespace App\Entity;
 
 use App\Repository\UserRepository;
+use App\Repository\InventoryRepository;
 use Doctrine\Common\Collections\ArrayCollection;
 use Doctrine\Common\Collections\Collection;
 use Doctrine\ORM\Mapping as ORM;
+use Symfony\Component\Security\Core\User\PasswordAuthenticatedUserInterface;
+use Symfony\Component\Security\Core\User\UserInterface;
 
 /**
  * @ORM\Entity(repositoryClass=UserRepository::class)
  */
-class User
+class User implements UserInterface, PasswordAuthenticatedUserInterface
 {
     /**
      * @ORM\Id
@@ -25,27 +28,23 @@ class User
     private $name;
 
     /**
-     * @ORM\Column(type="string", length=255)
+     * @ORM\Column(type="string", length=180, unique=true)
      */
     private $email;
 
     /**
-     * @ORM\Column(type="string", length=255)
+     * @ORM\Column(type="json")
      */
-    private $password_hash;
+    private $roles = [];
 
     /**
-     * @ORM\Column(type="string", length=255)
+     * @var string The hashed password
+     * @ORM\Column(type="string")
      */
-    private $password_plain;
+    private $password;
 
     /**
-     * @ORM\Column(type="boolean")
-     */
-    private $superadmin;
-
-    /**
-     * @ORM\Column(type="string", length=255)
+     * @ORM\Column(type="string", length=255, nullable=true)
      */
     private $shop_name;
 
@@ -65,7 +64,7 @@ class User
     private $updated_at;
 
     /**
-     * @ORM\Column(type="string", length=255)
+     * @ORM\Column(type="string", length=255, nullable=true)
      */
     private $card_brand;
 
@@ -85,12 +84,12 @@ class User
     private $shop_domain;
 
     /**
-     * @ORM\Column(type="boolean")
+     * @ORM\Column(type="boolean", nullable=true)
      */
     private $is_enabled;
 
     /**
-     * @ORM\Column(type="string", length=255)
+     * @ORM\Column(type="string", length=255, nullable=true)
      */
     private $billing_plan;
 
@@ -104,9 +103,15 @@ class User
      */
     private $products;
 
+    /**
+     * @ORM\OneToMany(targetEntity=Inventory::class, mappedBy="admin_id")
+     */
+    private $inventory;
+
     public function __construct()
     {
         $this->products = new ArrayCollection();
+        $this->inventory = new ArrayCollection();
     }
 
     public function getId(): ?int
@@ -134,42 +139,6 @@ class User
     public function setEmail(string $email): self
     {
         $this->email = $email;
-
-        return $this;
-    }
-
-    public function getPasswordHash(): ?string
-    {
-        return $this->password_hash;
-    }
-
-    public function setPasswordHash(string $password_hash): self
-    {
-        $this->password_hash = $password_hash;
-
-        return $this;
-    }
-
-    public function getPasswordPlain(): ?string
-    {
-        return $this->password_plain;
-    }
-
-    public function setPasswordPlain(string $password_plain): self
-    {
-        $this->password_plain = $password_plain;
-
-        return $this;
-    }
-
-    public function getSuperadmin(): ?bool
-    {
-        return $this->superadmin;
-    }
-
-    public function setSuperadmin(bool $superadmin): self
-    {
-        $this->superadmin = $superadmin;
 
         return $this;
     }
@@ -307,6 +276,14 @@ class User
     }
 
     /**
+     * @return Collection|Inventory[]
+     */
+    public function getInventory(): Collection
+    {
+        return $this->inventory;
+    }
+
+    /**
      * @return Collection|Product[]
      */
     public function getProducts(): Collection
@@ -334,5 +311,77 @@ class User
         }
 
         return $this;
+    }
+
+    /**
+     * A visual identifier that represents this user.
+     *
+     * @see UserInterface
+     */
+    public function getUserIdentifier(): string
+    {
+        return (string) $this->email;
+    }
+
+    /**
+     * @deprecated since Symfony 5.3, use getUserIdentifier instead
+     */
+    public function getUsername(): string
+    {
+        return (string) $this->email;
+    }
+
+    /**
+     * @see UserInterface
+     */
+    public function getRoles(): array
+    {
+        $roles = $this->roles;
+        // guarantee every user at least has ROLE_USER
+        $roles[] = 'ROLE_USER';
+
+        return array_unique($roles);
+    }
+
+    public function setRoles(array $roles): self
+    {
+        $this->roles = $roles;
+
+        return $this;
+    }
+
+    /**
+     * @see PasswordAuthenticatedUserInterface
+     */
+    public function getPassword(): string
+    {
+        return $this->password;
+    }
+
+    public function setPassword(string $password): self
+    {
+        $this->password = $password;
+
+        return $this;
+    }
+
+    /**
+     * Returning a salt is only needed, if you are not using a modern
+     * hashing algorithm (e.g. bcrypt or sodium) in your security.yaml.
+     *
+     * @see UserInterface
+     */
+    public function getSalt(): ?string
+    {
+        return null;
+    }
+
+    /**
+     * @see UserInterface
+     */
+    public function eraseCredentials()
+    {
+        // If you store any temporary, sensitive data on the user, clear it here
+        // $this->plainPassword = null;
     }
 }

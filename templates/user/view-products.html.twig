@@ -1,0 +1,47 @@
+{% extends 'base.html.twig' %}
+
+{% block title %}{{ user_name }} Products{% endblock %}
+
+{% block body %}
+    {% if app.user %}
+        <div class="mb-3">
+            <p>You are logged in as {{ app.user.username }}</p>
+        </div>
+        <div class="mb-3">
+            <p>You can: <a href="{{ path('app_logout') }}">Logout</a> | <a href="{{ path('inventory_view', {'page': 1}) }}">View Inventory</a></p>
+        </div>
+    {% endif %}
+
+    {% if products %}
+        <div class="mb-3">
+            <p>There are {{ totalProducts }} products.</p>
+        </div>
+        <table class="products">
+            <tr class="table-nav-row">
+                {% if page > 1 %}
+                <td class="table-nav-item"><a href="{{ path('products_view', {'page': page - 1}) }}">Previous Page</a></td>
+                {% else %}
+                <td class="table-nav-item">Previous Page</td>
+                {% endif %}
+                {% if products|length == 20 %}
+                <td class="table-nav-item"><a href="{{ path('products_view', {'page': page + 1}) }}">Next Page</a></td>
+                {% else %}
+                <td class="table-nav-item">Next Page</td>
+                {% endif %}
+            </tr>
+            <tr class="table-header-row">
+                <td class="table-header-item">Name</td>
+                <td class="table-header-item">Style</td>
+                <td class="table-header-item">Brand</td>
+            </tr>
+            {% for product in products %}
+                <tr class="table-row">
+                    <td class="table-item">{{ product.getProductName() }}</td>
+                    <td class="table-item">{{ product.getStyle() }}</td>
+                    <td class="table-item">{{ product.getBrand() }}</td>
+                </tr>
+            {% endfor %}
+        </table>
+    {% endif %}
+
+{% endblock %}

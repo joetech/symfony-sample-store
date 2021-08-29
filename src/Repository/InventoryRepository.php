@@ -19,32 +19,31 @@ class InventoryRepository extends ServiceEntityRepository
         parent::__construct($registry, Inventory::class);
     }
 
-    // /**
-    //  * @return Inventory[] Returns an array of Inventory objects
-    //  */
-    /*
-    public function findByExampleField($value)
+    /**
+     * @return Inventory[] Returns an array of Inventory objects filtered by product id
+     */
+    public function findAllByProductId(int $id)
     {
         return $this->createQueryBuilder('i')
-            ->andWhere('i.exampleField = :val')
-            ->setParameter('val', $value)
+            ->andWhere('i.product_id = :val')
+            ->setParameter('val', $id)
             ->orderBy('i.id', 'ASC')
-            ->setMaxResults(10)
             ->getQuery()
             ->getResult()
         ;
     }
-    */
 
-    /*
-    public function findOneBySomeField($value): ?Inventory
+    /**
+     * @return Inventory[] Returns an array of Inventory objects filtered by sku
+     */
+    public function findAllBySku(string $sku)
     {
         return $this->createQueryBuilder('i')
-            ->andWhere('i.exampleField = :val')
-            ->setParameter('val', $value)
+            ->andWhere('i.sku = :val')
+            ->setParameter('val', $sku)
+            ->orderBy('i.id', 'ASC')
             ->getQuery()
-            ->getOneOrNullResult()
+            ->getResult()
         ;
     }
-    */
 }

@@ -20,22 +20,22 @@ class Product
     private $id;
 
     /**
-     * @ORM\Column(type="string", length=255)
+     * @ORM\Column(type="string", length=255, nullable=true)
      */
     private $product_name;
 
     /**
-     * @ORM\Column(type="text")
+     * @ORM\Column(type="text", nullable=true)
      */
     private $description;
 
     /**
-     * @ORM\Column(type="text")
+     * @ORM\Column(type="text", nullable=true)
      */
     private $style;
 
     /**
-     * @ORM\Column(type="text")
+     * @ORM\Column(type="text", nullable=true)
      */
     private $brand;
 
@@ -50,17 +50,17 @@ class Product
     private $updated_at;
 
     /**
-     * @ORM\Column(type="string", length=255)
+     * @ORM\Column(type="string", length=255, nullable=true)
      */
     private $url;
 
     /**
-     * @ORM\Column(type="string", length=255)
+     * @ORM\Column(type="string", length=255, nullable=true)
      */
     private $product_type;
 
     /**
-     * @ORM\Column(type="integer")
+     * @ORM\Column(type="integer", nullable=true)
      */
     private $shipping_price;
 
@@ -80,8 +80,15 @@ class Product
      */
     private $orders;
 
+
+    /**
+     * @ORM\OneToMany(targetEntity=Inventory::class, mappedBy="product_id")
+     */
+    private $inventory;
+
     public function __construct()
     {
+        $this->inventory = new ArrayCollection();
         $this->orders = new ArrayCollection();
     }
 
@@ -244,6 +251,33 @@ class Product
     {
         if ($this->orders->removeElement($order)) {
             $order->removeProductId($this);
+        }
+
+        return $this;
+    }
+
+    /**
+     * @return Collection|Inventory[]
+     */
+    public function getInventory(): Collection
+    {
+        return $this->inventory;
+    }
+
+    public function addInventory(Inventory $inventory): self
+    {
+        if (!$this->inventory->contains($inventory)) {
+            $this->inventory[] = $inventory;
+            $inventory->addInventoryId($this);
+        }
+
+        return $this;
+    }
+
+    public function removeInventory(Inventory $inventory): self
+    {
+        if ($this->inventory->removeElement($inventory)) {
+            $inventory->removeInventoryId($this);
         }
 
         return $this;

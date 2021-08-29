@@ -18,13 +18,19 @@ class Inventory
     private $id;
 
     /**
-     * @ORM\OneToOne(targetEntity=Product::class, cascade={"persist", "remove"})
+     * @ORM\ManyToOne(targetEntity=Product::class, inversedBy="inventory")
      * @ORM\JoinColumn(nullable=false)
      */
     private $product_id;
 
     /**
-     * @ORM\Column(type="integer")
+     * @ORM\ManyToOne(targetEntity=User::class, inversedBy="inventory")
+     * @ORM\JoinColumn(nullable=false)
+     */
+    private $admin_id;
+
+    /**
+     * @ORM\Column(type="integer", nullable=true)
      */
     private $quantity;
 
@@ -44,37 +50,37 @@ class Inventory
     private $weight;
 
     /**
-     * @ORM\Column(type="integer")
+     * @ORM\Column(type="integer", nullable=true)
      */
     private $price_cents;
 
     /**
-     * @ORM\Column(type="integer")
+     * @ORM\Column(type="integer", nullable=true)
      */
     private $sale_price_cents;
 
     /**
-     * @ORM\Column(type="integer")
+     * @ORM\Column(type="integer", nullable=true)
      */
     private $cost_cents;
 
     /**
-     * @ORM\Column(type="string", length=255)
+     * @ORM\Column(type="string", length=255, nullable=true)
      */
     private $sku;
 
     /**
-     * @ORM\Column(type="float")
+     * @ORM\Column(type="float", nullable=true)
      */
     private $length;
 
     /**
-     * @ORM\Column(type="float")
+     * @ORM\Column(type="float", nullable=true)
      */
     private $width;
 
     /**
-     * @ORM\Column(type="float")
+     * @ORM\Column(type="float", nullable=true)
      */
     private $height;
 
@@ -96,6 +102,18 @@ class Inventory
     public function setProductId(Product $product_id): self
     {
         $this->product_id = $product_id;
+
+        return $this;
+    }
+
+    public function getAdminId(): ?Product
+    {
+        return $this->admin_id;
+    }
+
+    public function setAdminId(Product $admin_id): self
+    {
+        $this->admin_id = $admin_id;
 
         return $this;
     }
@@ -153,6 +171,11 @@ class Inventory
         return $this->price_cents;
     }
 
+    public function getPriceDollars(): ?float
+    {
+        return (float) ($this->price_cents / 100);
+    }
+
     public function setPriceCents(int $price_cents): self
     {
         $this->price_cents = $price_cents;
@@ -175,6 +198,11 @@ class Inventory
     public function getCostCents(): ?int
     {
         return $this->cost_cents;
+    }
+
+    public function getCostDollars(): ?float
+    {
+        return (float) ($this->cost_cents / 100);
     }
 
     public function setCostCents(int $cost_cents): self
